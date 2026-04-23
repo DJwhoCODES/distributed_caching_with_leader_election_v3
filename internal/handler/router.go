@@ -2,16 +2,22 @@ package handler
 
 import (
 	"github.com/djwhocodes/d-cache/internal/cache"
+	"github.com/djwhocodes/d-cache/internal/cluster"
 	"github.com/djwhocodes/d-cache/internal/protocol"
+	"github.com/djwhocodes/d-cache/internal/replication"
 )
 
 type Router struct {
-	store *cache.Store
+	store      *cache.Store
+	cluster    *cluster.Cluster
+	replicator *replication.Replicator
 }
 
-func NewRouter(store *cache.Store) *Router {
+func NewRouter(store *cache.Store, c *cluster.Cluster) *Router {
 	return &Router{
-		store: store,
+		store:      store,
+		cluster:    c,
+		replicator: replication.NewReplicator(c),
 	}
 }
 
