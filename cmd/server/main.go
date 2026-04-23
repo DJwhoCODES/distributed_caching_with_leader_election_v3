@@ -3,32 +3,27 @@ package main
 import (
 	"log"
 	"net"
+	"time"
 
-	"github.com/djwhocodes/d-cache/internal/protocol"
+	"github.com/djwhocodes/d-cache/internal/cache"
+	"github.com/djwhocodes/d-cache/internal/handler"
 	"github.com/djwhocodes/d-cache/internal/transport"
 )
 
 func main() {
 	server := transport.NewTCPServer(":8080")
+	store := cache.NewStore()
+	store.StartJanitor(10 * time.Second)
 
-	err := server.Start(connectionHandler)
+	router := handler.NewRouter(store)
+
+	err := server.Start(connectionHandler, *router)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func connectionHandler(conn net.Conn) {
-	transport.HandleConnection(conn, handleRequest)
-}
-
-func handleRequest(req *protocol.Request) *protocol.Response {
-	return &protocol.Response{
-		Header: protocol.Header{
-			Command:   req.Header.Command,
-			RequestID: req.Header.RequestID,
-		},
-		Status: protocol.StatusOK,
-		Value:  []byte("OK"),
-	}
+func connectionHandler(conn net.Conn, router handler.Router) {
+	transport.HandleConnection(conn, router.Handle)
 }

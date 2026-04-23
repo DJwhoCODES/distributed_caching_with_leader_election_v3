@@ -16,7 +16,7 @@ func NewStore() *Store {
 	}
 }
 
-func (s *Store) Set(key string, value []byte, ttl int32) {
+func (s *Store) Set(key string, value []byte, ttl uint32) {
 	var exp int64 = 0
 
 	if ttl > 0 {
